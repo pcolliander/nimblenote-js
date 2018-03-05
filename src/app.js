@@ -3,21 +3,28 @@ import './App.css';
 import { Container, Header, Footer, Icon } from './ui-components';
 import Sidebar from './sidebar';
 import Editor from './editor';
+import { gql } from 'apollo-boost';
+import { compose, graphql  } from 'react-apollo';
 
 class Nimblenote extends Component {
-
   constructor(props) {
     super(props);
 
     this.state = {
-      notes: [],
+      activeNoteId: 1,
     };
   }
 
-  render() {
+  render () {
+    const { loading, error, notes } = this.props.data;
+
+    if (loading || error) return 'loading';
+
+    const activeNote = notes.find(n => n.id === this.state.activeNoteId);
+
     return (
       <Container>
-        <Header borderBottom borderRight column='1/2'>
+        <Header column='1/2' borderBottom borderRight >
           <h3>Nimblenote</h3>
 
         <span onClick={this.addNote}>
@@ -26,24 +33,48 @@ class Nimblenote extends Component {
 
         </Header>
 
-        <Header borderBottom column='2/3'>
+        <Header column='2/3' borderBottom >
           <Icon className='fa fa-columns fa-2x'></Icon>
         </Header>
 
-        <Sidebar notes={this.state.notes} />
+        <Sidebar changeActiveNote={this.changeActiveNote} notes={notes} />
 
-        <Editor>editor</Editor>
+        <Editor activeNote={activeNote}>editor</Editor>
 
         <Footer />
       </Container>
     )
   }
 
-  addNote = () =>
-    this.setState({
-      notes: this.state.notes.concat(1),
-    });
+  addNote = () => this.props.createNote();
+
+  changeActiveNote = id =>
+    this.setState({ activeNoteId: id });
 }
 
-export default Nimblenote;
+export const GetNotes = gql`query { notes { id, content }}`;
+
+const createNote = graphql(gql`
+  mutation {
+    createNote(content: "new note") {
+      id,
+      content,
+    }
+  }`, { 
+    name: "createNote",
+    options: {
+      update: (proxy, { data: { createNote: note }} ) => {
+        const data = proxy.readQuery({ query: GetNotes });
+
+        data.notes.push(note);
+        proxy.writeQuery({ query: GetNotes, data });
+      },
+    }                  
+});
+  
+
+export default compose(
+  createNote,
+  graphql(GetNotes),
+)(Nimblenote)
 

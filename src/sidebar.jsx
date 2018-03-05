@@ -1,10 +1,10 @@
 import React from 'react';
 import { Aside, Note } from './ui-components';
 
-const Sidebar = ({ notes }) =>
+const Sidebar = ({ changeActiveNote, notes }) =>
   <Aside>
-    {notes.map((n, i) => 
-      <Note>{i}</Note>)
+    {notes.map(note =>
+      <Note onClick={() => changeActiveNote(note.id)}>{note.content}</Note>)
     }
   </Aside>
 
