@@ -7,6 +7,7 @@ import { GetNotes } from './app';
 import { client } from './index';
 import debounce from 'lodash.debounce';
 
+
 const writeToCache = ({ query, data }) =>
   client.writeQuery({ query, data });
 

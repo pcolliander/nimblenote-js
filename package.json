@@ -34,7 +34,7 @@
 		"pretty-quick": "^1.4.1"
 	},
 	"lint-staged": {
-		"src/**/*.{js, jsx, json,css,ts}": [
+		"src/**/*.{js,jsx,json,css,ts}": [
 			"prettier --write",
 			"git add"
 		]
